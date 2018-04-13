@@ -1,0 +1,313 @@
+\documentclass[pdflatex,ja=standard]{beamer}
+\usepackage{amsmath, amssymb, amsthm, amscd}
+\usepackage[all]{xy}
+
+\usepackage[whole]{bxcjkjatype}
+
+\usepackage{beamerthemeshadow}
+\usefonttheme{professionalfonts}
+
+\usepackage{inconsolata}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage[all]{xy}
+\usepackage{framed}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\newcommand{\mathint}[0]{\mathbb{Z}}
+
+\newcommand{\category}[1]{\mathcal{#1}}
+
+\title{型の圏}
+\author{Tomohiko KINEBUCHI}
+\date{2018-04-13}
+
+\begin{document}
+\frame{\titlepage}
+
+% ・型について
+% ・関数の型
+% ・単純型と関数の型が圏 (型の圏) をなすこと
+% ・Python での型の記法
+% ・型の圏における直積, 直和, 関手
+% ・型の圏での直積, 直和の存在と一意性
+% 
+% ・(おまけ) 単純型付きλ計算, CH 対応
+
+\frame{
+  \frametitle{目次}
+  \begin{itemize}
+  \item 型について
+  \item 値・変数・関数の型
+  \item Pythonの型記法（型ヒント）
+    \begin{itemize}
+    \item 変数注釈
+    \item 関数注釈
+    \item 型検査
+    \end{itemize}
+  \item 型の圏
+    \begin{itemize}
+    \item 定義
+    \item 型と関数が圏を成すこと
+    \item 直積 - Tuple型
+    \item 関手 - 総称型
+    \end{itemize}
+  \item まとめ
+  \item おまけ
+    \begin{itemize}
+    \item 単純型付きλ計算
+    \item Curry-Howard対応
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{型について}
+  「型」とはプログラムに登場する値や式の種類のことで、 \\
+  その役割は
+  \begin{itemize}
+  \item プログラムの間違いの検出 \\
+    整数が期待されているところに文字列が現れるなどの間違いを事前に見付ける。
+  \item 抽象化、インターフェースの定義 \\
+    値や関数の重要な性質だけに着目する。
+  \item ソースコードを読みやすくする。 \\
+    「ソースコード」とはプログラムを人間が読める形で記述したもの。
+    % 言語の安全性については説明し切れないので割愛
+  \item プログラムの最適化 \\
+    型の情報を使って、より高速なプログラムを生成する。
+  \end{itemize}
+  ref.『Types and Programming Languages』(Benjamin C. Pierce)
+}
+
+\frame{
+  \frametitle{値・変数・関数の型}
+  型は大きく分けて3種類
+  \begin{itemize}
+  \item 値の型 \\
+    例、\code{'String'}は文字列型、\code{123}は整数型
+  \item 変数の型：変数の宣言や初期化のときに指定あるいは推論 \\
+    ※ Pythonには変数の宣言は無い \\
+    例、\code{x: str}では\code{x}は文字列型、\code{x = 123}では\code{x}は整数型
+  \item 関数の型：関数の宣言や定義のときに指定あるいは推論 \\
+    例、\code{def func(arg: int) -> str: ...}では \\
+    \code{func}は整数を引数に取り文字列を返す関数型
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Pythonの型記法（型ヒント）}
+  xは文字列型の変数
+  \begin{framed}
+    \verbatiminput{./snippet/x_typed.py}
+  \end{framed}
+  funcは整数型の引数argを取り文字列型を返す型の関数
+  \begin{framed}
+    \verbatiminput{./snippet/func_typed.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{変数注釈(variable annotation)}
+  Python 3.5まで
+  \begin{framed}
+    \verbatiminput{./snippet/x.py}
+  \end{framed}
+  Python 3.6から変数に型が指定できる
+  \begin{framed}
+    \verbatiminput{./snippet/x_typed.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{関数注釈(function annotation)}
+  Python 2まで
+  \begin{framed}
+    \verbatiminput{./snippet/func.py}
+  \end{framed}
+  Python 3.0から関数に注釈が付けられる \\
+  Python 3.5から型注釈として使おうという流れに
+  \begin{framed}
+    \verbatiminput{./snippet/func_typed.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{型検査}
+  \begin{itemize}
+  \item Pythonの型記法は型ヒントと呼ばれるとおり「ただのヒント」で実行に全く影響しない。
+  \item 型の整合性が取れているかをチェックする型検査ツールが開発されている。
+    次は型検査エラーが出る例：
+    \begin{framed}
+      \verbatiminput{./snippet/type_error.py}
+    \end{framed}
+
+  \item 型検査ツールがいくつかあり、mypyが最も開発が進んでいる。
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{型の圏}
+  \begin{definition}[型の圏]
+    あるプログラミング言語の型は、1引数関数を射として圏を成す。
+
+    射の始域は引数の型、射の終域は返り値の型とする。
+    2つの射\code{f, g}の合成は\code{(f @ g)(x) = f(g(x))}と定義する。
+    (適当なPythonの演算子が無かったので@を使用する。)
+
+    ただし、関数には副作用（入出力、状態の変更、例外の発生など）は無いものとする。
+  \end{definition}
+  後で出てくる直積を使うことで任意の関数を1引数関数と見なせるので、
+  1引数関数に制限することは問題にはならない。
+}
+
+\frame{
+  \frametitle{型と関数が圏を成すこと}
+  \begin{itemize}
+  \item 恒等射
+    \begin{framed}
+      \verbatiminput{./snippet/identity.py}
+    \end{framed}
+  \item 射の合成の結合則
+    \begin{framed}
+      \verbatiminput{./snippet/associative_law.py}
+    \end{framed}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{直積 - Tuple型}
+  型の圏における直積は値の組``Tuple''
+
+  整数\code{1}と文字列\code{'2'}の組の型は\code{Tuple[int, str]}と表記し、
+  値は\code{(1, '2')}と表記する。
+
+  \begin{framed}
+    \verbatiminput{./snippet/tuple_typed.py}
+  \end{framed}
+
+  Tupleの性質
+  \begin{framed}
+    \verbatiminput{./snippet/tuple.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{直積の復習}
+  % 一般の圏の図式
+  圏$\category{C}$の対象$X$, $Y$の直積$\langle X \times Y, p, q \rangle$とは、
+  圏$\category{C}$の対象$X \times Y$、
+  射$p: X \times Y \rightarrow X$、
+  射$q: X \times Y \rightarrow Y$の組で、次の条件を満たすもの。
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      & W \ar[ld]_{f} \ar@{.>}[d]_{{}^{\exists1}h} \ar[rd]^{g} & \\
+      X & X \times Y \ar[l]^{p} \ar[r]_{q} & Y
+    }
+  }
+  （条件）
+  任意の圏$\category{C}$の対象$W$と射$f: W \rightarrow X$, $g: W \rightarrow Y$に対して、
+  射$h: W \rightarrow X \times Y$が1つだけあって次を満たす。
+  \begin{align*}
+    p \circ h &= f \\
+    q \circ h &= g    
+  \end{align*}
+}
+
+\frame{
+  \frametitle{Tuple型}
+  Tuple型が型の圏の直積になるためには次の条件を満たす必要がある。 \\
+  （条件）\code{A}, \code{B}, \code{C}を任意の型とし、
+  \code{f: Callable[[C], A]}, \code{g: Callable[[C], B]}を任意の関数としたとき、
+  関数\code{h: Callable[[C], Tuple[A, B]]}があって次を満たす。
+  \begin{align*}
+    \code{h(x)[0] == f(x)} \\
+    \code{h(x)[1] == g(x)}
+  \end{align*}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      & \code{C} \ar[ld]_{\code{f}} \ar@{.>}[d]_{{}^{\exists1}\code{h}} \ar[rd]^{\code{g}} & \\
+      \code{A} & \code{Tuple[A, B]} \ar[l]^{\code{[0]}} \ar[r]_{\code{[1]}} & \code{B}
+    }
+  }
+  → \code{h(x) = (f(x), g(x))}と実装すれば条件を満たす。
+}
+
+\frame{
+  \frametitle{関手 - 総称型}
+  型の圏における関手は、ある条件を満たす総称型
+  ``総称型''とは、任意の型を表す``型変数''を含んだ型のこと
+
+  例：List型
+  \begin{framed}
+    \verbatiminput{./snippet/list_str.py}
+  \end{framed}
+  \begin{itemize}
+  \item \code{List[...]}の\code{List}に続く角括弧には要素の型が入る。
+  \item \code{List}を任意の型\code{A}を引数に取り型\code{List[A]}を返す関数と見なす。
+    これがList関手の対象関数。
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{Listの射関数}
+  List関手の射関数は組み込み関数の\code{map}（Python 3では\code{list}）
+
+  例：射\code{length\_of\_string}を射関数\code{map}で変換する
+  \begin{framed}
+    \verbatiminput{./snippet/list_map.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{まとめ}
+  \centerline{圏論の概念とPythonの型の対応}
+  \bigskip
+  \centerline{
+    \begin{tabular}{l|l}
+      \hline
+      圏論の概念 & Pythonの型 \\
+      \hline \hline
+      対象 & 型 \\
+      射 & 関数 \\
+      直積 & Tuple型 \\
+      関手 & 総称型 \\
+      \hline
+    \end{tabular}
+  }
+  \bigskip
+  もちろんこれ以外にも、圏論の概念とPythonの型の対応は存在する。
+}
+
+\frame{
+  \frametitle{おまけ}
+  （時間が余ったら話す）
+
+  あるプログラミング言語とある論理には同型対応が存在する。
+  これをCurry-Howard同型と呼ぶ。
+}
+
+\frame{
+  \frametitle{Curry-Howard対応}
+  \centerline{
+    \begin{tabular}{l|l}
+      \hline
+      論理 & プログラミング言語 \\
+      \hline \hline
+      命題 & 型 \\
+      命題$P \subset Q$ & 型\code{Callable[[P], Q]} \\
+      命題$P \land Q$ & Tuple型\code{Tuple[P, Q]}\\
+      命題$P$の証明 & 型$P$を持つ式 \\
+      命題$P$が証明可能 & 型$P$を持つ式が存在する \\
+      \hline
+    \end{tabular}
+  }
+}
+
+\end{document}
