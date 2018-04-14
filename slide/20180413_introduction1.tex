@@ -126,6 +126,10 @@
   \begin{framed}
     \verbatiminput{./snippet/func.py}
   \end{framed}
+}
+
+\frame{
+  \frametitle{関数注釈(function annotation)}
   Python 3.0から関数に注釈が付けられる \\
   Python 3.5から型注釈として使おうという流れに
   \begin{framed}
@@ -186,8 +190,10 @@
   \begin{framed}
     \verbatiminput{./snippet/tuple_typed.py}
   \end{framed}
+}
 
-  Tupleの性質
+\frame{
+  \frametitle{Tupleの性質（公理）}
   \begin{framed}
     \verbatiminput{./snippet/tuple.py}
   \end{framed}
@@ -209,7 +215,7 @@
     }
   }
   （条件）
-  任意の圏$\category{C}$の対象$W$と射$f: W \rightarrow X$, $g: W \rightarrow Y$に対して、
+  圏$\category{C}$の任意の対象$W$と射$f: W \rightarrow X$, $g: W \rightarrow Y$に対して、
   射$h: W \rightarrow X \times Y$が1つだけあって次を満たす。
   \begin{align*}
     p \circ h &= f \\
@@ -220,9 +226,9 @@
 \frame{
   \frametitle{Tuple型}
   Tuple型が型の圏の直積になるためには次の条件を満たす必要がある。 \\
-  （条件）\code{A}, \code{B}, \code{C}を任意の型とし、
+  （条件）\code{C}を任意の型とし、
   \code{f: Callable[[C], A]}, \code{g: Callable[[C], B]}を任意の関数としたとき、
-  関数\code{h: Callable[[C], Tuple[A, B]]}があって次を満たす。
+  関数\code{h: Callable[[C], Tuple[A, B]]}が1つだけあって次を満たす。
   \begin{align*}
     \code{h(x)[0] == f(x)} \\
     \code{h(x)[1] == g(x)}
@@ -236,7 +242,14 @@
       \code{A} & \code{Tuple[A, B]} \ar[l]^{\code{[0]}} \ar[r]_{\code{[1]}} & \code{B}
     }
   }
-  → \code{h(x) = (f(x), g(x))}と実装すれば条件を満たす。
+}
+
+\frame{
+  \frametitle{Tuple型への射の実装}
+  次のように実装すれば条件を満たす。
+  \begin{framed}
+    \verbatiminput{./snippet/tuple_morphism.py}
+  \end{framed}
 }
 
 \frame{
