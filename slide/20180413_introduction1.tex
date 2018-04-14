@@ -270,12 +270,66 @@
 
 \frame{
   \frametitle{Listの射関数}
-  List関手の射関数は組み込み関数の\code{map}（Python 3では\code{list}）
+  List関手の射関数は組み込み関数の\code{map}（Python 3では\code{list}も必要）
 
   例：射\code{length\_of\_string}を射関数\code{map}で変換する
   \begin{framed}
     \verbatiminput{./snippet/list_map.py}
   \end{framed}
+}
+
+\frame{
+  \frametitle{関手の復習}
+
+  関手が満たすべき性質
+  \begin{itemize}
+  \item 圏$\category{C}$の図式$A \xrightarrow{f} B$を
+    圏$\category{D}$の図式$F(A) \xrightarrow{F(f)} F(B)$に写す。
+  \item 恒等射を恒等射に写す。 \\
+    $F(id_{A}) = id_{F(A)}$
+  \item 射の合成を射の合成に写す。 \\
+    $F(f \cdot g) = F(f) \cdot F(g)$
+  \end{itemize}
+
+  \code{List}がこの性質を持つことを確認する
+}
+
+\frame{
+  \frametitle{図式を写す}
+
+  \begin{itemize}
+  \item \code{x}の型が\code{List[str]}のとき
+    \code{list(map(length\_of\_str, x))}の型は\code{List[int]}
+  \end{itemize}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{str} \ar[d]_{\code{length\_of\_str}} & \code{List[str]} \ar[d]^{\code{list(map(length\_of\_str, \_))}} \\
+      \code{int} & \code{List[int]}
+    }
+  }
+}
+
+\frame{
+  \frametitle{恒等射を恒等射へ写す}
+
+  \begin{framed}
+    \verbatiminput{./snippet/identity.py}
+  \end{framed}
+  \begin{framed}
+    \verbatiminput{./snippet/map_identity.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{射の合成を射の合成へ写す}
+
+  \begin{framed}
+    \verbatiminput{./snippet/map_composition.py}
+  \end{framed}
+  ※ \code{@}という関数の演算子は無いので上のは疑似コード
 }
 
 \frame{
