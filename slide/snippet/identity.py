@@ -1,6 +1,6 @@
-import typing
+from typing import TypeVar
 
-A = typing.TypeVar('A')  # 型変数
+A = TypeVar('A')  # 型変数
 
 def id(arg: A) -> A:
     return arg

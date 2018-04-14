@@ -255,13 +255,13 @@
 \frame{
   \frametitle{関手 - 総称型}
   型の圏における関手は、ある条件を満たす総称型
-  ``総称型''とは、任意の型を表す``型変数''を含んだ型のこと
 
-  例：List型
+  \begin{itemize}
+    \item ``総称型''とは、任意の型を表す``型変数''を含んだ型のこと
+  \item 例：List型
   \begin{framed}
     \verbatiminput{./snippet/list_str.py}
   \end{framed}
-  \begin{itemize}
   \item \code{List[...]}の\code{List}に続く角括弧には要素の型が入る。
   \item \code{List}を任意の型\code{A}を引数に取り型\code{List[A]}を返す関数と見なす。
     これがList関手の対象関数。

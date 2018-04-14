@@ -1,4 +1,4 @@
-from typing Callable
+from typing import Callable
 
 def func(arg: int) -> str:
     return str(arg)
