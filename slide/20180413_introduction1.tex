@@ -52,7 +52,7 @@
     \item 定義
     \item 型と関数が圏を成すこと
     \item 直積 - Tuple型
-    \item 関手 - 総称型
+    \item 関手 - 高階型
     \end{itemize}
   \item まとめ
   \item おまけ
@@ -162,7 +162,7 @@
 
     ただし、関数には副作用（入出力、状態の変更、例外の発生など）は無いものとする。
   \end{definition}
-  後で出てくる直積を使うことで任意の関数を1引数関数と見なせるので、
+  後で出てくるTuple型を使うことで任意の関数を1引数関数と見なせるので、
   1引数関数に制限することは問題にはならない。
 }
 
@@ -253,17 +253,17 @@
 }
 
 \frame{
-  \frametitle{関手 - 総称型}
-  型の圏における関手は、ある条件を満たす総称型
+  \frametitle{関手 - 高階型}
+  型の圏における関手は、ある条件を満たす高階型
 
   \begin{itemize}
-    \item ``総称型''とは、任意の型を表す``型変数''を含んだ型のこと
+    \item ``高階型''とは、任意の型を表す``型変数''を含んだ型のこと
   \item 例：List型
   \begin{framed}
     \verbatiminput{./snippet/list_str.py}
   \end{framed}
   \item \code{List[...]}の\code{List}に続く角括弧には要素の型が入る。
-  \item \code{List}を任意の型\code{A}を引数に取り型\code{List[A]}を返す関数と見なす。
+  \item \code{List}を任意の型\code{A}を引数に取り、型\code{List[A]}を返す関数と見なす。
     これがList関手の対象関数。
   \end{itemize}
 }
@@ -344,12 +344,21 @@
       対象 & 型 \\
       射 & 関数 \\
       直積 & Tuple型 \\
-      関手 & 総称型 \\
+      関手 & 高階型 \\
       \hline
     \end{tabular}
   }
   \bigskip
   もちろんこれ以外にも、圏論の概念とPythonの型の対応は存在する。
+}
+
+\frame{
+  \frametitle{関手になる高階型の例}
+
+  \begin{itemize}
+  \item \code{Optional}：\code{Optional[str]}型の値は、文字列または「無効な値」を意味する\code{None}
+  \item \code{Set}：集合
+  \end{itemize}
 }
 
 \frame{
