@@ -1,0 +1,374 @@
+\documentclass[pdflatex,ja=standard]{beamer}
+\usepackage{amsmath, amssymb, amsthm, amscd}
+\usepackage[all]{xy}
+
+\usepackage[whole]{bxcjkjatype}
+
+\usepackage{beamerthemeshadow}
+\usefonttheme{professionalfonts}
+
+\usepackage{inconsolata}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage[all]{xy}
+\usepackage{framed}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\newcommand{\mathint}[0]{\mathbb{Z}}
+
+\newcommand{\category}[1]{\mathcal{#1}}
+
+\title{型の圏 その2}
+\author{Tomohiko KINEBUCHI}
+\date{2018-05-10}
+
+\begin{document}
+\frame{\titlepage}
+
+% ・型の圏の振り返り
+% ・自然変換の復習
+% ・型の圏の自然変換
+% ・自己関手の圏
+% ・モノイダル圏
+% ・モノイド対象
+% ・モナド
+% ・プログラム (Haskell) のモナド
+
+% Listを例に左からの乗算と右からの乗算の違いを見やすくする
+
+\frame{
+  \frametitle{目次}
+  \begin{itemize}
+  \item 目次
+  \item 
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{目標}
+  \begin{itemize}
+  \item「モナドは単なる自己関手の圏におけるモノイド対象だよ。何か問題でも？」という有名なフレーズを理解する。
+  \item これの元ネタは「$X$のモナドは$X$の自己函手からなる圏におけるモノイド」（『圏論の基礎』P.184）
+  \item モナドを大雑把に説明すると「純粋な計算に何らかの文脈を付加したもの」
+    \begin{itemize}
+    \item モナドの例：\code{List}, \code{Optional}
+    \end{itemize}
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{型の圏の復習}
+  \begin{itemize}
+  \item 対象は型
+  \item 射は関数
+    \begin{itemize}
+    \item 始域は引数の型
+    \item 終域は返り値の型
+    \end{itemize}
+  \item 射の合成は関数の合成
+  \end{itemize}
+  この圏において
+  \begin{itemize}
+  \item 関手は型引数を1つ取る高階型
+  \item 自然変換は……？
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{自然変換の復習}
+
+  $\category{C}, \category{D}$を圏、$F, G$を$\category{C}$から$\category{D}$への関手とする。
+
+  $F$から$G$への自然変換$\tau$とは、対象$A \in \mathrm{Ob}(F)$に対し
+  射$\tau_{A} \in \mathrm{Hom}(F(A), G(A))$が定まっていて次の図式を可換にするもの。
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      F(A) \ar[d]^{\tau_{A}} \ar[r]^{F(f)} &
+      F(B) \ar[d]^{\tau_{B}} \\
+      G(A) \ar[r]^{G(f)} &
+      G(B)
+    }
+  }
+}
+
+\frame{
+  \frametitle{型の圏の自然変換の例}
+
+  型の圏には関手があるので、自然変換ももちろんある。
+
+  例：\code{List}関手から\code{Optional}関手への自然変換\code{take\_first}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{List[str]} \ar[d]^{\code{take\_first}} \ar[r]^*+{\code{list(map(length\_of\_str, \_))}} &
+      \code{List[int]} \ar[d]^{\code{take\_first}} \\
+      \code{Optional[str]} \ar[r] &
+      \code{Optional[int]}
+    }
+  }
+}
+
+\frame{
+  \frametitle{\code{take\_first}の実装}
+
+  \begin{framed}
+    \verbatiminput{./snippet/take_first.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{具体的な値で見る自然変換}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{['a', 'bb', 'ccc']} \ar@{|->}[d]^{\code{take\_first}} \ar@{|->}[r] &
+      \code{[1, 2, 3]} \ar@{|->}[d]^{\code{take\_first}} \\
+      \code{'a'} \ar@{|->}[r] &
+      \code{1}
+    }
+  }
+}
+
+\frame{
+  \frametitle{具体的な値で見る自然変換}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{[]} \ar@{|->}[d]^{\code{take\_first}} \ar@{|->}[r] &
+      \code{[]} \ar@{|->}[d]^{\code{take\_first}} \\
+      \code{None} \ar@{|->}[r] &
+      \code{None}
+    }
+  }
+}
+
+\frame{
+  \frametitle{自己関手の圏}
+
+  ある圏$\category{C}$から圏$\category{C}$への関手のことを$\category{C}$の自己関手と呼ぶ。
+  ここで、ある圏について次のような圏が定義できる。
+
+  \begin{itemize}
+  \item 対象は自己関手
+  \item 射は自己関手から自己関手への自然変換
+    \begin{itemize}
+    \item 射の始域は自然変換の始域となる関手
+    \item 射の終域は自然変換の終域となる関手
+    \end{itemize}
+  \item 射の合成は自然変換の（垂直）合成
+  \end{itemize}
+
+}
+
+\frame{
+  \frametitle{自然変換の（垂直）合成}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      F(A) \ar[d]^{\sigma_{A}} \ar[r]^{F(f)} \ar@/_2pc/[dd]_{(\tau\circ\sigma)_{A} = \tau_{A}\circ\sigma_{A}} &
+      F(B) \ar[d]^{\sigma_{B}} \ar@/^2pc/[dd]^{\tau_{B}\circ\sigma_{B} = (\tau\circ\sigma)_{B}} \\
+      G(A) \ar[d]^{\tau_{A}} \ar[r]^{G(f)} &
+      G(B) \ar[d]^{\tau_{A}} \\
+      H(A) \ar[r]^{H(f)} &
+      H(B)
+    }
+  }
+}
+
+\frame{
+  \frametitle{型の圏の自己関手が成す圏}
+
+  以下では、型の圏$\category{T}$を例として話を進める。
+
+  \begin{itemize}
+  \item 対象は型引数が1つの高階型（\code{List}や\code{Optional}など）
+  \item 射は「型引数が1つの高階型」から「型引数が1つの高階型」への自然変換
+  \item 射の合成は自然変換の合成
+  \end{itemize}
+
+  呼び名が長いので「型の圏$\category{T}$の自己関手が成す圏」は$\mathrm{End}(\category{T})$と表記する。
+
+  ここからは$\mathrm{End}(\category{T})$がストリクトモノイダル圏になることを見ていく。
+}
+
+\frame{
+  \frametitle{ストリクトモノイダル圏の復習}
+  ストリクトモノイダル圏は、一般のモノイダル圏よりも条件（結合律、単位元律）が厳しい。
+
+  ストリクトモノイダル圏$\category{B}$の定義
+  \begin{itemize}
+  \item 双関手がある：$\otimes: \category{B}\times\category{B} \to \category{B}$（乗法）
+  \item 両側恒等対象を持つ：$E \in \mathrm{Ob}(\category{B})$
+  \item 結合律を満たす：$(A \otimes B) \otimes C = A \otimes (B \otimes C)$
+  \item 単位元律を満たす：$E \otimes A = A = A \otimes E$
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{$\mathrm{End}(\category{T})$はストリクトモノイダル圏}
+
+  \begin{itemize}
+  \item 関手の合成を乗法
+  \item 恒等関手を両側恒等対象
+  \end{itemize}
+  とすると、$\mathrm{End}(\category{T})$はストリクトモノイダル圏になる。
+}
+
+\frame{
+  \frametitle{モノイド対象}
+  ここまでに出てきた乗法と両側恒等対象を使ってモノイド対象を定義する。
+
+  ストリクトモノイダル圏$\langle \category{B}, \otimes, E\rangle$におけるモノイド対象$M$の定義
+  \begin{itemize}
+  \item $M \in \mathrm{Ob}(\category{B})$
+  \item 射$\mu: M \otimes M \to M$がある
+  \item 射$\eta: E \to M$がある
+  \item $\mu(\mu(M \otimes M) \otimes M) = \mu(M \otimes \mu(M \otimes M))$を満たす
+  \item $\mu(\eta(E) \otimes M) = M = \mu(M \otimes \eta(E))$を満たす
+  \end{itemize}
+}
+
+\frame{
+  \frametitle{モナドの正体}
+  ここまで来れば「自己関手の圏のモノイド対象」の意味が分かる！（はず……）
+}
+
+\frame{
+  \frametitle{$\mathrm{End}(\category{T})$のモノイド対象の定義}
+
+  $\mathrm{End}(\category{T})$のモノイド対象のこと、すなわち
+  \begin{itemize}
+  \item 関手$M$
+  \item 射$\mu: M \circ M \to M$がある
+  \item 恒等関手を始域とする射$\eta: \mathrm{Id} \to M$がある
+  \item 結合律$(M \circ M) \circ M = M \circ (M \circ M)$を満たす
+  \item 単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$を満たす
+  \end{itemize}
+
+  実はこれは、型の圏$\category{T}$におけるモナド$M$の定義と一致する！
+}
+
+\frame{
+  \frametitle{モナドの例：\code{List}モナド}
+
+  モナドの例として\code{List}を取り上げ、
+  実際に\code{List}がモナドの定義を満たすことを見ていく。
+
+  \begin{itemize}
+  \item \code{List}が関手であること
+  \item 関手の合成が結合律を満たすこと
+  \end{itemize}
+  は簡単に分かるのでそれ以外の3つの条件について実装を見ていく。
+}
+
+\frame{
+  \frametitle{射$\mu: M \circ M \to M$（モナドの乗法）の存在}
+  % join の例
+  \code{List}$\circ$\code{List}, \code{List}は関手なので、
+  その間の射は自然変換。
+  \code{flatten}という、入れ子になったリストを平らにする（flatten）関数がそれに相当する。
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{List[List[str]]} \ar[d]^{\code{flatten}} \ar[r] &
+      \code{List[List[int]]} \ar[d]^{\code{flatten}} \\
+      \code{List[str]} \ar[r] &
+      \code{List[int]}
+    }
+  }
+}
+
+\frame{
+  \frametitle{\code{flatten}の実装}
+  % 入れ子を1つつぶす
+  \begin{framed}
+    \verbatiminput{./snippet/flatten.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{\code{flatten}の実行結果}
+  \begin{framed}
+    \verbatiminput{./snippet/flatten_exmple.txt}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{射$\eta: \mathrm{Id} \to M$（モナドの単位元）の存在}
+
+  \code{Id}, \code{List}は関手なので、その間の射は自然変換。
+  \code{unit}という、受け取った値のみを要素とするリストを返す関数がそれに相当する。
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{Id[str]}=\code{str} \ar[d]^{\code{unit}} \ar[r] &
+      \code{Id[int]}=\code{int} \ar[d]^{\code{unit}} \\
+      \code{List[str]} \ar[r] &
+      \code{List[int]}
+    }
+  }
+}
+
+\frame{
+  \frametitle{\code{unit}の実装}
+  % 単位元 a -> m a
+  % 単にくるむだけ
+  \begin{framed}
+    \verbatiminput{./snippet/list_unit.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{\code{unit}の実行結果}
+  \begin{framed}
+    \verbatiminput{./snippet/unit_example.txt}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$を満たすこと}
+
+  次のコードを実行してエラーが出ないことを確認すれば良い。
+  \begin{framed}
+    \verbatiminput{./snippet/unit_law.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{まとめ}
+  \centerline{圏論の概念とPythonの型の対応}
+  \bigskip
+  \centerline{
+    \begin{tabular}{l|l}
+      \hline
+      圏論の概念 & Pythonの型 \\
+      \hline \hline
+      対象 & 型 \\
+      射 & 関数 \\
+      直積 & Tuple型 \\
+      関手 & 高階型 \\
+      自然変換 & 引数と返り値の型が高階型である関数の型 \\
+      モナド & モナド \\
+      \hline
+    \end{tabular}
+  }
+}
+
+\end{document}
