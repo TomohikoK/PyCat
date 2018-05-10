@@ -36,13 +36,38 @@
 % ・モナド
 % ・プログラム (Haskell) のモナド
 
-% Listを例に左からの乗算と右からの乗算の違いを見やすくする
+\frame{
+  \frametitle{目次}
+  \begin{itemize}
+  \item 目標
+  \item 型の圏の復習
+  \item 自然変換の復習
+  \item 型の圏の自然変換の例
+  \item take\_firstの実装
+  \item 具体的な値で見る自然変換
+  \item 自己関手の圏
+  \item 自然変換の（垂直）合成
+  \item 型の圏の自己関手が成す圏
+  \item ストリクトモノイダル圏の復習
+  \end{itemize}
+}
 
 \frame{
   \frametitle{目次}
   \begin{itemize}
-  \item 目次
-  \item 
+  \item $\mathrm{End}(\mathcal{T})$はストリクトモノイダル圏
+  \item モノイド対象
+  \item モナドの正体
+  \item $\mathrm{End}(\mathcal{T})$のモノイド対象の定義
+  \item モナドの例：\code{List}モナド
+  \item 射$\mu: M \circ M \to M$（モナドの乗法）の存在
+  \item \code{flatten}の実装
+  \item \code{flatten}の実行結果
+  \item 射$\eta: \mathrm{Id} \to M$（モナドの単位元）の存在
+  \item \code{unit}の実装
+  \item \code{unit}の実行結果
+  \item 単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$を満たすこと
+  \item まとめ
   \end{itemize}
 }
 
