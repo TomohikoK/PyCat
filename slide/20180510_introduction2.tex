@@ -63,10 +63,13 @@
   \item 射$\mu: M \circ M \to M$（モナドの乗法）の存在
   \item \code{flatten}の実装
   \item \code{flatten}の実行結果
+  \item 具体的な値で見る\code{flatten}
   \item 射$\eta: \mathrm{Id} \to M$（モナドの単位元）の存在
   \item \code{unit}の実装
   \item \code{unit}の実行結果
-  \item 単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$を満たすこと
+  \item 具体的な値で見る\code{unit}
+  \item 結合律$\mu(\mu(M \circ M) \circ M) = \mu(M \circ \mu(M \circ M))$の成立
+  \item 単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$の成立
   \item まとめ
   \end{itemize}
 }
@@ -199,6 +202,9 @@
 \frame{
   \frametitle{自然変換の（垂直）合成}
 
+  $\sigma: F \to G$と$\tau: G \to H$の合成$\tau \circ \sigma: F \to H$
+  \bigskip
+
   \def\objectstyle{\displaystyle}
   \def\labelstyle{\displaystyle}
   \centerline{
@@ -294,9 +300,8 @@
 
   \begin{itemize}
   \item \code{List}が関手であること
-  \item 関手の合成が結合律を満たすこと
   \end{itemize}
-  は簡単に分かるのでそれ以外の3つの条件について実装を見ていく。
+  は簡単に分かるのでそれ以外の4つの条件について実装を見ていく。
 }
 
 \frame{
@@ -334,6 +339,21 @@
 }
 
 \frame{
+  \frametitle{具体的な値で見る\code{flatten}}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{[['a', 'bb'], ['ccc']]} \ar@{|->}[d]^{\code{flatten}} \ar@{|->}[r] &
+      \code{[[1, 2], [3]]} \ar@{|->}[d]^{\code{flatten}} \\
+      \code{['a', 'bb', 'ccc']} \ar@{|->}[r] &
+      \code{[1, 2, 3]}
+    }
+  }
+}
+
+\frame{
   \frametitle{射$\eta: \mathrm{Id} \to M$（モナドの単位元）の存在}
 
   \code{Id}, \code{List}は関手なので、その間の射は自然変換。
@@ -368,7 +388,31 @@
 }
 
 \frame{
-  \frametitle{単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$を満たすこと}
+  \frametitle{具体的な値で見る\code{unit}}
+
+  \def\objectstyle{\displaystyle}
+  \def\labelstyle{\displaystyle}
+  \centerline{
+    \xymatrix@=60pt{
+      \code{'a'} \ar@{|->}[d]^{\code{flatten}} \ar@{|->}[r] &
+      \code{1} \ar@{|->}[d]^{\code{flatten}} \\
+      \code{['a']} \ar@{|->}[r] &
+      \code{[1]}
+    }
+  }
+}
+
+\frame{
+  \frametitle{結合律$\mu(\mu(M \circ M) \circ M) = \mu(M \circ \mu(M \circ M))$の成立}
+
+  次のコードを実行してエラーが出ないことを確認すれば良い。
+  \begin{framed}
+    \verbatiminput{./snippet/functor_associative_law.py}
+  \end{framed}
+}
+
+\frame{
+  \frametitle{単位元律$\mu(\eta(\mathrm{Id}) \circ M) = M = \mu(M \circ \eta(\mathrm{Id}))$の成立}
 
   次のコードを実行してエラーが出ないことを確認すれば良い。
   \begin{framed}
